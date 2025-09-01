@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Seedsowers Ministry - Christian E-Learning Platform{% endblock %}
+
+{% block content %}
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <div class="logo-large">
+                    <i class="fas fa-seedling"></i>
+                    <h1>Seedsowers Ministry</h1>
+                </div>
+                <h2>Grow in Faith Through Structured Christian Learning</h2>
+                <p class="hero-description">
+                    Join our comprehensive Christian training program featuring sequential courses designed to deepen your faith, 
+                    expand your biblical knowledge, and prepare you for ministry service.
+                </p>
+                <div class="hero-actions">
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-large">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Start Learning
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline btn-large">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-card">
+                    <i class="fas fa-bible hero-icon"></i>
+                    <h3>7 Comprehensive Courses</h3>
+                    <p>From Introductory Discipleship to Advanced Ministry Training</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose Seedsowers Ministry?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3>Sequential Learning Path</h3>
+                    <p>Progress through carefully structured courses that build upon each other, ensuring solid biblical foundation.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Rich Media Content</h3>
+                    <p>Learn through audio teachings, video lessons, and comprehensive PDF materials from trusted Christian leaders.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Track Your Progress</h3>
+                    <p>Monitor your learning journey with detailed progress tracking and completion certificates.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Guided by Instructors</h3>
+                    <p>Submit assignments and receive feedback from experienced Disciplers.</p>
+                </div>
+                
+                <!-- <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h3>Earn Certifications</h3>
+                    <p>Complete courses and receive recognition for your commitment to Christian growth and learning.</p>
+                </div> -->
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-pray"></i>
+                    </div>
+                    <h3>Spiritual Formation</h3>
+                    <p>Focus on character development, prayer life, and practical application of biblical principles.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Course Overview -->
+    <section class="course-overview">
+        <div class="container">
+            <h2 class="section-title">Training Courses Overview</h2>
+            <div class="courses-preview">
+                <div class="course-preview">
+                    <div class="course-number">01</div>
+                    <div class="course-info">
+                        <h3>Disciples Introductory</h3>
+                        <p>4 Months • NBDS/ROCK Audio Series, Die Series One</p>
+                        <span class="course-level">Foundation Level</span>
+                    </div>
+                </div>
+                
+                <div class="course-preview">
+                    <div class="course-number">02</div>
+                    <div class="course-info">
+                        <h3>Haseem with Practicals</h3>
+                        <p>2 Months • Practical Ministry Applications</p>
+                        <span class="course-level">Intermediate</span>
+                    </div>
+                </div>
+                
+                <div class="course-preview">
+                    <div class="course-number">03</div>
+                    <div class="course-info">
+                        <h3>Faith & Prayer Course</h3>
+                        <p>4 Months • Kenneth Hagin, Prayer Course, Missionary Package</p>
+                        <span class="course-level">Advanced</span>
+                    </div>
+                </div>
+                
+                <div class="course-preview">
+                    <div class="course-number">04-07</div>
+                    <div class="course-info">
+                        <h3>Advanced Ministry Training</h3>
+                        <p>Specialized courses for ministry leadership and service</p>
+                        <span class="course-level">Expert Level</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Begin Your Journey?</h2>
+                <p>Join thousands of believers who are growing in faith through our structured Christian education program.</p>
+                <div class="cta-actions">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-large">
+                        <i class="fas fa-arrow-right"></i>
+                        Enroll Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

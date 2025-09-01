@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Courses - Seedsowers Ministry{% endblock %}
+
+{% block page_title %}Training Courses{% endblock %}
+
+{% block content %}
+<div class="courses-page" data-testid="courses-view">
+    <div class="courses-grid">
+        {% for course in courses %}
+            {% set course_progress = user_progress|selectattr('course_id', 'equalto', course.id)|list %}
+            {% set completed_course = completed_courses|selectattr('course_id', 'equalto', course.id)|first %}
+            
+            {# Get the previous course #}
+            {% set prev_course = courses|selectattr('order', 'equalto', course.order - 1)|first %}
+            {# Check if the previous course is completed #}
+            {% set prev_completed = completed_courses|selectattr('course_id', 'equalto', prev_course.id)|first if prev_course else None %}
+            
+            {# Unlock logic #}
+            {% set is_unlocked = (course.order == 1) or (prev_completed is not none) %}
+            
+            {# Dynamic file/material count #}
+            {% set total_files = course.files|length if course.files is defined else 0 %}
+            {% set completed_files = course_progress|length %}
+            {% set progress_percent = (completed_files / total_files * 100) if total_files > 0 else 0 %}
+            
+            <div class="course-card {% if not is_unlocked %}locked{% endif %} {% if completed_course %}completed{% endif %}" 
+                 data-testid="card-course-{{ course.id }}">
+                
+                <!-- Course Header -->
+                <div class="course-header">
+                    <div class="course-order">{{ course.order }}</div>
+                    <div class="course-status">
+                        {% if completed_course %}
+                            <span class="status-badge completed">
+                                <i class="fas fa-certificate"></i>
+                                Completed
+                            </span>
+                        {% elif not is_unlocked %}
+                            <span class="status-badge locked">
+                                <i class="fas fa-lock"></i>
+                                Locked
+                            </span>
+                        {% elif completed_files > 0 %}
+                            <span class="status-badge active">
+                                <i class="fas fa-play-circle"></i>
+                                In Progress
+                            </span>
+                        {% else %}
+                            <span class="status-badge available">
+                                <i class="fas fa-unlock"></i>
+                                Available
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Course Content -->
+                <div class="course-content">
+                    <h3>{{ course.title }}</h3>
+                    <p class="course-description">{{ course.description }}</p>
+                    
+                    <div class="course-meta">
+                        <span class="course-duration">
+                            <i class="fas fa-clock"></i>
+                            {{ course.duration }}
+                        </span>
+                        <span class="course-files">
+                            <i class="fas fa-file"></i>
+                            {{ total_files }} Materials
+                        </span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    {% if is_unlocked and total_files > 0 %}
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span class="progress-text">{{ completed_files }}/{{ total_files }} completed</span>
+                            <span class="progress-percent">{{ progress_percent|round|int }}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ progress_percent }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Course Actions -->
+                <div class="course-actions">
+                    {% if is_unlocked %}
+                        <a href="{{ url_for('course_detail', course_id=course.id) }}" 
+                           class="btn btn-primary btn-full" data-testid="button-view-course-{{ course.id }}">
+                            {% if completed_files > 0 %}
+                                <i class="fas fa-play"></i>
+                                Continue Course
+                            {% else %}
+                                <i class="fas fa-book-open"></i>
+                                Start Course
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        <button class="btn btn-disabled btn-full" disabled>
+                            <i class="fas fa-lock"></i>
+                            Complete Previous Course
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Course Requirements Notice -->
+    <div class="course-requirements">
+        <div class="requirement-card">
+            <div class="requirement-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="requirement-content">
+                <h3>Course Progression Requirements</h3>
+                <ul>
+                    <li>Complete all materials in the current course</li>
+                    <li>Submit your course report for review</li>
+                    <li>Receive approval from an instructor</li>
+                    <li>Only then will the next course be unlocked</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

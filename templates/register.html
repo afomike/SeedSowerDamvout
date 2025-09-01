@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Seedsowers Ministry{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-form">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-seedling"></i>
+                    <span>Seedsowers Ministry</span>
+                </div>
+                <h2>Join Our Community</h2>
+                <p>Create your account to start your Christian learning journey</p>
+            </div>
+            
+            <form method="POST" class="form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">First Name</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="first_name" name="first_name" required 
+                                   placeholder="First name" data-testid="input-first-name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">Last Name</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="last_name" name="last_name" required 
+                                   placeholder="Last name" data-testid="input-last-name">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="Enter your email" data-testid="input-email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required 
+                               placeholder="Create a strong password" data-testid="input-password">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full" data-testid="button-register">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </button>
+                </div>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Already have an account? 
+                    <a href="{{ url_for('login') }}" data-testid="link-login">Sign in here</a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="auth-sidebar">
+            <div class="auth-sidebar-content">
+                <h3>What You'll Get</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>7 Comprehensive Training Courses</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-video"></i>
+                        <span>Audio, Video & PDF Materials</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-route"></i>
+                        <span>Sequential Learning Path</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-hands-praying"></i>
+                        <span>Biblical Foundation Building</span>
+                    </div>
+                    <!-- <div class="feature-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Course Completion Certificates</span>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

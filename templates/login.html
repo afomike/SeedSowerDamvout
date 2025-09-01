@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Seedsowers Ministry{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-form">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-seedling"></i>
+                    <span>Seedsowers Ministry</span>
+                </div>
+                <h2>Welcome Back</h2>
+                <p>Sign in to continue your Christian learning journey</p>
+            </div>
+            
+            <form method="POST" class="form">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="Enter your email" data-testid="input-email">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" required 
+                               placeholder="Enter your password" data-testid="input-password">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full" data-testid="button-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </button>
+                </div>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Don't have an account? 
+                    <a href="{{ url_for('register') }}" data-testid="link-register">Create one here</a>
+                </p>
+            </div>
+        </div>
+        
+        <div class="auth-sidebar">
+            <div class="auth-sidebar-content">
+                <h3>Continue Your Faith Journey</h3>
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <i class="fas fa-book-open"></i>
+                        <span>Access your course materials</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Track your learning progress</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <span>Connect with Disciplers</span>
+                    </div>
+                    <!-- <div class="feature-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Earn course certificates</span>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

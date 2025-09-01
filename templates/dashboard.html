@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Seedsowers Ministry{% endblock %}
+
+{% block page_title %}Welcome, {{ current_user.get_display_name() }}{% endblock %}
+
+{% block content %}
+<div class="dashboard" data-testid="dashboard-view">
+    <!-- Progress Overview Cards -->
+    <div class="stats-grid">
+        <div class="stat-card" data-testid="card-current-course">
+            <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Current Course</h3>
+                {% if courses %}
+                    <p class="stat-value">{{ courses[0].title }}</p>
+                    <p class="stat-label">{{ courses[0].duration }}</p>
+                {% else %}
+                    <p class="stat-value">No courses available</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="stat-card" data-testid="card-progress">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Progress</h3>
+                <p class="stat-value">{{ user_progress|length }}/{{ courses|length * 15 }}</p>
+                <p class="stat-label">Files Completed</p>
+            </div>
+        </div>
+        
+        <div class="stat-card" data-testid="card-completed-courses">
+            <div class="stat-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Completed</h3>
+                <p class="stat-value">{{ completed_courses|length }}</p>
+                <p class="stat-label">Courses Finished</p>
+            </div>
+        </div>
+        
+        <div class="stat-card" data-testid="card-total-courses">
+            <div class="stat-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Courses</h3>
+                <p class="stat-value">{{ courses|length }}</p>
+                <p class="stat-label">Available</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Current Course Progress -->
+    {% if courses %}
+    <div class="course-progress-card">
+        <h2>Current Course Progress</h2>
+        <div class="course-header">
+            <div class="course-info">
+                <h3>{{ courses[0].title }}</h3>
+                <p>{{ courses[0].description }}</p>
+                <span class="course-duration">
+                    <i class="fas fa-clock"></i>
+                    {{ courses[0].duration }}
+                </span>
+            </div>
+            <div class="progress-circle">
+                {% set current_progress = (user_progress|selectattr('course_id', 'equalto', courses[0].id)|list|length) %}
+                {% set total_files = 15 %}
+                {% set progress_percent = (current_progress / total_files * 100) if total_files > 0 else 0 %}
+                <div class="circle-progress" data-percent="{{ progress_percent }}">
+                    <span class="progress-value">{{ progress_percent|round|int }}%</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ progress_percent }}%"></div>
+        </div>
+        
+        <div class="course-actions">
+            <a href="{{ url_for('course_detail', course_id=courses[0].id) }}" 
+               class="btn btn-primary" data-testid="button-continue-course">
+                <i class="fas fa-play"></i>
+                Continue Learning
+            </a>
+            <a href="{{ url_for('courses') }}" class="btn btn-outline">
+                <i class="fas fa-list"></i>
+                View All Courses
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <h2>Recent Activity</h2>
+        <div class="activity-list">
+            {% for progress in user_progress[-5:] %}
+            <div class="activity-item">
+                <div class="activity-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="activity-content">
+                    <p class="activity-title">Completed file in {{ progress.course.title if progress.course else 'Unknown Course' }}</p>
+                    <p class="activity-date">{{ progress.completed_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not user_progress %}
+            <div class="activity-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No recent activity yet</p>
+                <p>Start your first course to see your progress here</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

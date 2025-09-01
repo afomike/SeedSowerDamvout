@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - Seedsowers Ministry{% endblock %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+    <!-- Admin Stats -->
+    <div class="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Users</h3>
+                <p class="stat-value">{{ stats.total_users }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Courses</h3>
+                <p class="stat-value">{{ stats.total_courses }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Pending Reviews</h3>
+                <p class="stat-value">{{ stats.pending_submissions }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Submissions</h3>
+                <p class="stat-value">{{ stats.total_submissions }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="courses" data-testid="tab-courses">
+                <i class="fas fa-book"></i>
+                Course Management
+            </button>
+            <button class="tab-btn" data-tab="users" data-testid="tab-users">
+                <i class="fas fa-users"></i>
+                User Management
+            </button>
+            <button class="tab-btn" data-tab="submissions" data-testid="tab-submissions">
+                <i class="fas fa-file-alt"></i>
+                Review Submissions
+            </button>
+        </div>
+        
+        <!-- Course Management Tab -->
+        <div class="tab-content active" id="courses-tab">
+            <div class="tab-header">
+                <h2>Course Management</h2>
+                <button class="btn btn-primary" id="addCourseBtn" data-testid="button-add-course">
+                    <i class="fas fa-plus"></i>
+                    Add New Course
+                </button>
+            </div>
+            
+            <div class="courses-admin-list" id="coursesList">
+                <!-- Courses will be loaded here via JavaScript -->
+            </div>
+        </div>
+        
+        <!-- User Management Tab -->
+        <div class="tab-content" id="users-tab">
+            <div class="tab-header">
+                <h2>User Management</h2>
+            </div>
+            
+            <div class="users-admin-list" id="usersList">
+                <!-- Users will be loaded here via JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Submissions Review Tab -->
+        <div class="tab-content" id="submissions-tab">
+            <div class="tab-header">
+                <h2>Pending Submissions</h2>
+            </div>
+            
+            <div class="submissions-admin-list" id="submissionsList">
+                <!-- Submissions will be loaded here via JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Add Course Modal -->
+    <div class="modal" id="addCourseModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Course</h3>
+                <button class="modal-close" data-testid="button-close-modal">&times;</button>
+            </div>
+            <form id="addCourseForm" class="form">
+                <div class="form-group">
+                    <label for="course_title">Course Title</label>
+                    <input type="text" id="course_title" name="title" required data-testid="input-course-title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="course_description">Description</label>
+                    <textarea id="course_description" name="description" rows="3" required data-testid="textarea-course-description"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course_duration">Duration</label>
+                        <input type="text" id="course_duration" name="duration" placeholder="e.g., 4 Months" required data-testid="input-course-duration">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="course_order">Course Order</label>
+                        <input type="number" id="course_order" name="order" min="1" required data-testid="input-course-order">
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('addCourseModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" data-testid="button-save-course">
+                        <i class="fas fa-save"></i>
+                        Create Course
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Review Submission Modal -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Review Submission</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div id="reviewModalContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Tab functionality
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const tabId = this.dataset.tab;
+        
+        // Update active tab button
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update active tab content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId + '-tab').classList.add('active');
+        
+        // Load content based on tab
+        loadTabContent(tabId);
+    });
+});
+
+// Modal functionality
+function openModal(modalId) {
+    document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal(this.id);
+        }
+    });
+});
+
+// Close modal buttons
+document.querySelectorAll('.modal-close').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.closest('.modal').style.display = 'none';
+    });
+});
+
+// Add course button
+document.getElementById('addCourseBtn').addEventListener('click', function() {
+    openModal('addCourseModal');
+});
+
+// Load tab content
+function loadTabContent(tabId) {
+    switch(tabId) {
+        case 'courses':
+            loadCourses();
+            break;
+        case 'users':
+            loadUsers();
+            break;
+        case 'submissions':
+            loadSubmissions();
+            break;
+    }
+}
+
+// Load functions (these would make API calls in a real app)
+function loadCourses() {
+    // Implementation would load courses from API
+    console.log('Loading courses...');
+}
+
+function loadUsers() {
+    // Implementation would load users from API
+    console.log('Loading users...');
+}
+
+function loadSubmissions() {
+    // Implementation would load submissions from API
+    console.log('Loading submissions...');
+}
+
+// Initialize with courses tab
+loadTabContent('courses');
+</script>
+{% endblock %}

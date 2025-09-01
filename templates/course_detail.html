@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} - Seedsowers Ministry{% endblock %}
+
+{% block page_title %}{{ course.title }}{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('courses') }}" class="btn btn-outline">
+    <i class="fas fa-arrow-left"></i>
+    Back to Courses
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="course-detail-page">
+    <!-- Course Overview -->
+    <div class="course-overview-card">
+        <div class="course-header">
+            <div class="course-info">
+                <h1>{{ course.title }}</h1>
+                <p class="course-description">{{ course.description }}</p>
+                <div class="course-meta">
+                    <span class="course-duration">
+                        <i class="fas fa-clock"></i>
+                        {{ course.duration }}
+                    </span>
+                    <span class="course-order">
+                        <i class="fas fa-list-ol"></i>
+                        Course {{ course.order }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="course-progress-summary">
+                {% set completed_files = user_progress|length %}
+                {% set total_files = files|length %}
+                {% set progress_percent = (completed_files / total_files * 100) if total_files > 0 else 0 %}
+                
+                <div class="progress-circle-large">
+                    <div class="circle-progress" data-percent="{{ progress_percent }}">
+                        <span class="progress-value">{{ progress_percent|round|int }}%</span>
+                    </div>
+                </div>
+                <p class="progress-text">{{ completed_files }}/{{ total_files }} materials completed</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Materials -->
+    <div class="course-materials">
+        <div class="materials-header">
+            <h2>Course Materials</h2>
+            <p>Complete all materials in order to finish this course</p>
+        </div>
+        
+        <div class="materials-list">
+            {% for file in files %}
+            {% set is_completed = file.id in user_progress|map(attribute='file_id')|list %}
+            
+            <div class="material-item {% if is_completed %}completed{% endif %}" 
+                 data-testid="material-{{ file.id }}">
+                
+                <div class="material-icon">
+                    {% if file.file_type == 'audio' %}
+                        <i class="fas fa-headphones"></i>
+                    {% elif file.file_type == 'video' %}
+                        <i class="fas fa-video"></i>
+                    {% elif file.file_type == 'pdf' %}
+                        <i class="fas fa-file-pdf"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="material-content">
+                    <div class="material-header">
+                        <h3>{{ file.title }}</h3>
+                        <div class="material-actions">
+                            {% if is_completed %}
+                                <span class="completion-badge">
+                                    <i class="fas fa-check-circle"></i>
+                                    Completed
+                                </span>
+                            {% else %}
+                                <button class="btn btn-sm btn-primary mark-complete-btn" 
+                                        data-file-id="{{ file.id }}" data-testid="button-complete-{{ file.id }}">
+                                    <i class="fas fa-check"></i>
+                                    Mark Complete
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if file.description %}
+                    <p class="material-description">{{ file.description }}</p>
+                    {% endif %}
+                    
+                    <div class="material-meta">
+                        <span class="material-type">{{ file.file_type.title() }}</span>
+                        {% if file.duration %}
+                        <span class="material-duration">
+                            <i class="fas fa-clock"></i>
+                            {{ file.duration }}
+                        </span>
+                        {% endif %}
+                        <span class="material-size">
+                            <i class="fas fa-file"></i>
+                            {% if file.file_size %}
+                                {{ (file.file_size / 1024 / 1024)|round(1) }} MB
+                            {% else %}
+                                Unknown size
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="material-actions-full">
+                        <a href="{{ url_for('uploaded_file', filename=file.file_path.split('/')[-1]) }}" 
+                           class="btn btn-outline" target="_blank" data-testid="button-view-{{ file.id }}">
+                            <i class="fas fa-external-link-alt"></i>
+                            View {{ file.file_type.title() }}
+                        </a>
+                        <a href="{{ url_for('uploaded_file', filename=file.file_path.split('/')[-1]) }}" 
+                           class="btn btn-outline" download data-testid="button-download-{{ file.id }}">
+                            <i class="fas fa-download"></i>
+                            Download
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not files %}
+            <div class="materials-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No materials available yet</p>
+                <p>Materials will be added by the instructor</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Course Completion -->
+    {% if user_progress|length == files|length and files|length > 0 %}
+    <div class="course-completion-card">
+        <div class="completion-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="completion-content">
+            <h3>Course Materials Completed!</h3>
+            <p>You've finished all materials for this course. Now submit your course report for review.</p>
+            <a href="{{ url_for('submissions') }}" class="btn btn-primary btn-large">
+                <i class="fas fa-upload"></i>
+                Submit Course Report
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Mark file as complete functionality
+document.querySelectorAll('.mark-complete-btn').forEach(button => {
+    button.addEventListener('click', async function() {
+        const fileId = this.dataset.fileId;
+        const courseId = '{{ course.id }}';
+        
+        try {
+            const response = await fetch('/api/mark-complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    file_id: fileId
+                })
+            });
+            
+            if (response.ok) {
+                location.reload(); // Refresh to show updated progress
+            } else {
+                alert('Failed to mark file as complete. Please try again.');
+            }
+        } catch (error) {
+            alert('An error occurred. Please try again.');
+        }
+    });
+});
+</script>
+{% endblock %}

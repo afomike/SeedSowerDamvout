@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Submissions - Seedsowers Ministry{% endblock %}
+
+{% block page_title %}Course Submissions{% endblock %}
+
+{% block content %}
+<div class="submissions-page" data-testid="submissions-view">
+    <!-- Submit New Report -->
+    <div class="submit-report-card">
+        <h2>Submit Course Report</h2>
+        <p>Upload your course completion report for instructor review.</p>
+        
+        <form method="POST" action="/api/submit-report" enctype="multipart/form-data" 
+              class="submission-form" id="submitForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="course_id">Select Course</label>
+                    <select name="course_id" id="course_id" required data-testid="select-course">
+                        <option value="">Choose a course...</option>
+                        {% for course in courses %}
+                        <option value="{{ course.id }}">{{ course.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="comments">Comments (Optional)</label>
+                <textarea name="comments" id="comments" rows="4" 
+                          placeholder="Add any comments about your course experience..."
+                          data-testid="textarea-comments"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="submission_file">Upload Report File</label>
+                <div class="file-upload-area" id="fileUploadArea">
+                    <input type="file" name="submission_file" id="submission_file" 
+                           accept=".pdf,.doc,.docx,.txt" required data-testid="input-file">
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drop your file here or <span class="upload-link">browse</span></p>
+                        <p class="upload-hint">Supports PDF, DOC, DOCX, TXT (Max 10MB)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" data-testid="button-submit-report">
+                    <i class="fas fa-upload"></i>
+                    Submit Report
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Submission History -->
+    <div class="submission-history">
+        <h2>Submission History</h2>
+        
+        <div class="submissions-list">
+            {% for submission in submissions %}
+            <div class="submission-item" data-testid="submission-{{ submission.id }}">
+                <div class="submission-header">
+                    <div class="submission-info">
+                        <h3>{{ submission.file_name }}</h3>
+                        <p class="submission-course">
+                            {% for course in courses %}
+                                {% if course.id == submission.course_id %}
+                                    {{ course.title }}
+                                {% endif %}
+                            {% endfor %}
+                        </p>
+                    </div>
+                    
+                    <div class="submission-status">
+                        <span class="status-badge {{ submission.get_status_badge_class() }}">
+                            {% if submission.status == 'pending' %}
+                                <i class="fas fa-clock"></i>
+                                Pending Review
+                            {% elif submission.status == 'approved' %}
+                                <i class="fas fa-check-circle"></i>
+                                Approved
+                            {% elif submission.status == 'rejected' %}
+                                <i class="fas fa-times-circle"></i>
+                                Rejected
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                {% if submission.comments %}
+                <div class="submission-comments">
+                    <p><strong>Your Comments:</strong></p>
+                    <p>{{ submission.comments }}</p>
+                </div>
+                {% endif %}
+                
+                {% if submission.review_comments and submission.status != 'pending' %}
+                <div class="review-feedback">
+                    <div class="feedback-header">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Instructor Feedback</span>
+                        {% if submission.reviewer %}
+                            <span class="reviewer-name">by {{ submission.reviewer.get_display_name() }}</span>
+                        {% endif %}
+                    </div>
+                    <p class="feedback-text">{{ submission.review_comments }}</p>
+                </div>
+                {% endif %}
+                
+                <div class="submission-meta">
+                    <span class="submission-date">
+                        <i class="fas fa-calendar"></i>
+                        Submitted {{ submission.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </span>
+                    {% if submission.reviewed_at %}
+                    <span class="review-date">
+                        <i class="fas fa-clock"></i>
+                        Reviewed {{ submission.reviewed_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    </span>
+                    {% endif %}
+                    <span class="file-size">
+                        <i class="fas fa-file"></i>
+                        {% if submission.file_size %}
+                            {{ (submission.file_size / 1024 / 1024)|round(1) }} MB
+                        {% else %}
+                            Unknown size
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="submission-actions">
+                    <a href="{{ url_for('uploaded_file', filename='submissions/' + submission.file_path.split('/')[-1]) }}" 
+                       class="btn btn-outline btn-sm" target="_blank" data-testid="button-view-{{ submission.id }}">
+                        <i class="fas fa-eye"></i>
+                        View File
+                    </a>
+                    <a href="{{ url_for('uploaded_file', filename='submissions/' + submission.file_path.split('/')[-1]) }}" 
+                       class="btn btn-outline btn-sm" download data-testid="button-download-{{ submission.id }}">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if not submissions %}
+            <div class="submissions-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No submissions yet</p>
+                <p>Submit your first course report to get started</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// File upload functionality
+const fileUploadArea = document.getElementById('fileUploadArea');
+const fileInput = document.getElementById('submission_file');
+
+fileUploadArea.addEventListener('click', () => {
+    fileInput.click();
+});
+
+fileUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.add('drag-over');
+});
+
+fileUploadArea.addEventListener('dragleave', () => {
+    fileUploadArea.classList.remove('drag-over');
+});
+
+fileUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.remove('drag-over');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        updateFileDisplay(files[0]);
+    }
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        updateFileDisplay(e.target.files[0]);
+    }
+});
+
+function updateFileDisplay(file) {
+    const placeholder = fileUploadArea.querySelector('.upload-placeholder');
+    placeholder.innerHTML = `
+        <i class="fas fa-file"></i>
+        <p><strong>${file.name}</strong></p>
+        <p class="upload-hint">${(file.size / 1024 / 1024).toFixed(1)} MB</p>
+    `;
+}
+</script>
+{% endblock %}
