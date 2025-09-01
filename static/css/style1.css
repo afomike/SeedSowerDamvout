@@ -1764,6 +1764,197 @@ textarea {
     }
 }
 
+/* Enhanced Admin Styles */
+.header-actions {
+    display: flex;
+    gap: var(--spacing-3);
+    align-items: center;
+}
+
+.admin-course-item {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+}
+
+.course-header-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-4);
+}
+
+.course-actions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.file-type-section {
+    margin-bottom: var(--spacing-6);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-4);
+}
+
+.file-type-section h5 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-2);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.files-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.admin-file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.file-info h6 {
+    margin: 0 0 var(--spacing-2) 0;
+    color: var(--text-dark);
+}
+
+.file-info p {
+    margin: 0 0 var(--spacing-2) 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.file-meta {
+    display: flex;
+    gap: var(--spacing-4);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.file-actions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.files-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-6);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.large-modal .modal-content {
+    max-width: 800px;
+    width: 90%;
+}
+
+.file-info {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: var(--spacing-2);
+}
+
+.admin-user-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-3);
+}
+
+.user-info h4 {
+    margin: 0 0 var(--spacing-1) 0;
+}
+
+.user-info p {
+    margin: 0 0 var(--spacing-2) 0;
+    color: var(--text-muted);
+}
+
+.role-badge {
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.role-student {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.role-admin {
+    background: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.role-super_admin {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.admin-submission-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-4);
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-3);
+}
+
+.submission-info h4 {
+    margin: 0 0 var(--spacing-2) 0;
+}
+
+.submission-info p {
+    margin: 0 0 var(--spacing-1) 0;
+    font-size: 0.9rem;
+}
+
+.submission-actions {
+    display: flex;
+    gap: var(--spacing-2);
+}
+
+.status-active {
+    color: var(--success-color);
+}
+
+.status-inactive {
+    color: var(--error-color);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-8);
+    color: var(--text-muted);
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    border: 2px dashed var(--border-color);
+}
+
+.empty-state i {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-4);
+    opacity: 0.5;
+}
+}
+
 @media (max-width: 480px) {
     .hero {
         padding: var(--spacing-12) 0;

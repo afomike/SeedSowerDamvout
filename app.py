@@ -46,10 +46,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
-# Create upload directories
+# Create upload directories with organized structure
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'course-files'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'submissions'), exist_ok=True)
+
+# Create organized subdirectories for different file types
+file_types = ['pdf', 'audio', 'video', 'image']
+for file_type in file_types:
+    os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'course-files', 'organized', file_type), exist_ok=True)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -372,13 +377,21 @@ def upload_course_file(course_id):
     duration = request.form.get('duration', '')
     
     if file and allowed_course_file(file.filename):
+        # Get course details for organized folder structure
+        course = Course.query.get_or_404(course_id)
+        
+        # Create organized folder structure: course-files/course-id/file-type/
+        course_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'course-files', course_id)
+        type_folder = os.path.join(course_folder, file_type)
+        
+        # Ensure organized directory structure exists
+        os.makedirs(type_folder, exist_ok=True)
+        
         filename = secure_filename(file.filename)
         # Add timestamp to avoid conflicts
         filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{filename}"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'course-files', filename)
+        file_path = os.path.join(type_folder, filename)
         
-        # Ensure course-files directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         file.save(file_path)
         
         # Create course file record
@@ -397,13 +410,37 @@ def upload_course_file(course_id):
         db.session.add(course_file)
         db.session.commit()
         
-        return jsonify({'message': 'File uploaded successfully', 'id': course_file.id}), 201
+        return jsonify({
+            'message': 'File uploaded successfully', 
+            'id': course_file.id,
+            'organized_path': f"course-files/{course_id}/{file_type}/{filename}"
+        }), 201
     else:
         return jsonify({'error': 'Invalid file type'}), 400
 
 def allowed_course_file(filename):
-    ALLOWED_EXTENSIONS = {'pdf', 'mp3', 'wav', 'ogg', 'mp4', 'avi', 'mov', 'doc', 'docx'}
+    ALLOWED_EXTENSIONS = {
+        'pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt',  # Documents
+        'mp3', 'wav', 'ogg', 'aac', 'm4a',  # Audio
+        'mp4', 'avi', 'mov', 'mkv', 'webm',  # Video
+        'jpg', 'jpeg', 'png', 'gif', 'bmp'  # Images
+    }
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_file_type_from_extension(filename):
+    """Automatically determine file type based on extension"""
+    extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    
+    if extension in ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt']:
+        return 'pdf'
+    elif extension in ['mp3', 'wav', 'ogg', 'aac', 'm4a']:
+        return 'audio'
+    elif extension in ['mp4', 'avi', 'mov', 'mkv', 'webm']:
+        return 'video'
+    elif extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp']:
+        return 'image'
+    else:
+        return 'pdf'  # default fallback
 
 @app.route('/api/admin/users')
 @login_required
@@ -539,11 +576,117 @@ def get_user_submissions():
         'reviewed_at': s.reviewed_at.isoformat() if s.reviewed_at else None
     } for s in submissions])
 
-# File serving route
+# Admin course file management routes
+@app.route('/api/admin/courses/<course_id>/files')
+@login_required
+def get_course_files_admin(course_id):
+    if current_user.role not in ['admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    files = CourseFile.query.filter_by(course_id=course_id).order_by(CourseFile.order).all()
+    return jsonify([{
+        'id': f.id,
+        'title': f.title,
+        'description': f.description,
+        'file_type': f.file_type,
+        'file_path': f.file_path,
+        'file_size': f.file_size,
+        'duration': f.duration,
+        'order': f.order,
+        'created_at': f.created_at.isoformat()
+    } for f in files])
+
+@app.route('/api/admin/courses/<course_id>/files/<file_id>', methods=['DELETE'])
+@login_required
+def delete_course_file(course_id, file_id):
+    if current_user.role not in ['admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    course_file = CourseFile.query.get_or_404(file_id)
+    
+    # Delete physical file
+    try:
+        if os.path.exists(course_file.file_path):
+            os.remove(course_file.file_path)
+    except Exception as e:
+        print(f"Error deleting file: {e}")
+    
+    # Delete database record
+    db.session.delete(course_file)
+    db.session.commit()
+    
+    return jsonify({'message': 'File deleted successfully'})
+
+@app.route('/api/admin/courses/<course_id>/files/<file_id>', methods=['PUT'])
+@login_required
+def update_course_file(course_id, file_id):
+    if current_user.role not in ['admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    data = request.get_json()
+    course_file = CourseFile.query.get_or_404(file_id)
+    
+    course_file.title = data.get('title', course_file.title)
+    course_file.description = data.get('description', course_file.description)
+    course_file.duration = data.get('duration', course_file.duration)
+    course_file.order = data.get('order', course_file.order)
+    
+    db.session.commit()
+    
+    return jsonify({'message': 'File updated successfully'})
+
+@app.route('/api/admin/organize-files/<course_id>')
+@login_required
+def organize_course_files(course_id):
+    if current_user.role not in ['admin', 'super_admin']:
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    course = Course.query.get_or_404(course_id)
+    files = CourseFile.query.filter_by(course_id=course_id).all()
+    
+    organized_count = 0
+    for file in files:
+        # Check if file is already in organized structure
+        if f'course-files/{course_id}/' not in file.file_path:
+            # Create new organized path
+            file_extension = file.file_path.split('.')[-1]
+            new_filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{secure_filename(file.title)}.{file_extension}"
+            new_path = os.path.join(
+                app.config['UPLOAD_FOLDER'], 
+                'course-files', 
+                course_id, 
+                file.file_type, 
+                new_filename
+            )
+            
+            # Create directory structure
+            os.makedirs(os.path.dirname(new_path), exist_ok=True)
+            
+            # Move file if it exists
+            if os.path.exists(file.file_path):
+                os.rename(file.file_path, new_path)
+                file.file_path = new_path
+                organized_count += 1
+    
+    db.session.commit()
+    
+    return jsonify({
+        'message': f'Organized {organized_count} files',
+        'organized_count': organized_count
+    })
+
+# File serving route with organized structure support
 @app.route('/uploads/<path:filename>')
 @login_required
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/uploads/course-files/<course_id>/<file_type>/<filename>')
+@login_required
+def serve_organized_file(course_id, file_type, filename):
+    """Serve files from organized folder structure"""
+    file_path = os.path.join('course-files', course_id, file_type)
+    return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER'], file_path), filename)
 
 if __name__ == '__main__':
     with app.app_context():
